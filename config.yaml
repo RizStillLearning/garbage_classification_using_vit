@@ -1,0 +1,6 @@
+batch_size: 32
+num_epochs: 100
+learning_rate: 0.001
+image_size: 224
+weight_decay: 0.01
+num_classes: 10
