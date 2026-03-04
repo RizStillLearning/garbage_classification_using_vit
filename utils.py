@@ -51,13 +51,12 @@ def seed_everything(seed=42):
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
 
-def save_checkpoint(model, optimizer, epoch, val_loss, val_acc, file_path='checkpoint.pth'):
+def save_checkpoint(model, optimizer, epoch, val_loss, file_path='checkpoint.pth'):
     checkpoint = {
         'model_state_dict': model.state_dict(),
         'optimizer_state_dict': optimizer.state_dict(),
         'epoch': epoch,
-        'val_loss': val_loss,
-        'val_acc': val_acc
+        'val_loss': val_loss
     }
     torch.save(checkpoint, file_path)
 
@@ -65,4 +64,4 @@ def load_checkpoint(model, optimizer, file_path='checkpoint.pth'):
     checkpoint = torch.load(file_path, weights_only=False, map_location=get_device())
     model.load_state_dict(checkpoint['model_state_dict'])
     optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
-    return checkpoint['epoch'], checkpoint['val_loss'], checkpoint['val_acc']
+    return checkpoint['epoch'], checkpoint['val_loss']

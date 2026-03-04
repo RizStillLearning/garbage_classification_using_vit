@@ -1,6 +1,8 @@
 import torch
 import torch.optim as optim
 import torch.nn as nn
+import gc
+import copy
 from dataset import load_dataset_from_kaggle, split_dataset, build_dataloaders
 from utils import get_device, get_transform, get_target_transform, seed_everything, get_config, save_checkpoint, load_checkpoint
 from model import build_model
@@ -18,8 +20,6 @@ def get_linear_schedule_with_warmup(optimizer, num_warmup_steps, num_training_st
     return torch.optim.lr_scheduler.LambdaLR(optimizer, lr_lambda, last_epoch)
 
 def main():
-    torch.cuda.empty_cache()
-
     seed = 42
     seed_everything(seed)
 
@@ -40,7 +40,7 @@ def main():
     config = get_config()
 
     print("Training model...")
-    model = build_model(num_classes=len(classes))
+    model = build_model(img_size=config['image_size'], num_classes=len(classes))
     device = get_device()
     model.to(device)
 
@@ -48,6 +48,7 @@ def main():
     optimizer = optim.AdamW(model.parameters(), lr=config['learning_rate'], weight_decay=config['weight_decay'])
 
     best_val_loss = float('inf')
+    best_model = build_model(img_size=config['image_size'], num_classes=len(classes))
     cur_epoch = 1
 
     best_model_path = 'checkpoint.pth'
@@ -56,7 +57,8 @@ def main():
     checkpoint_file = list(current_dir.glob(best_model_path))
     # Check if checkpoint file exists and load it
     if checkpoint_file:
-        cur_epoch, best_val_loss, _ = load_checkpoint(model, optimizer, best_model_path)
+        cur_epoch, best_val_loss = load_checkpoint(model, optimizer, best_model_path)
+        best_model.load_state_dict(model.state_dict())
         print("Loaded model from checkpoint")
         print(f"Current epoch: {cur_epoch}, Current best validation loss: {best_val_loss:.4f}")
 
@@ -94,8 +96,13 @@ def main():
         # Save best model based on validation loss
         if val_loss < best_val_loss:
             best_val_loss = val_loss
-            save_checkpoint(model, optimizer, epoch, val_loss, val_acc, file_path=best_model_path)
+            best_model.load_state_dict(model.state_dict())
             print(f"  ✓ Best model saved! (val_loss: {val_loss:.4f})")
+            
+        save_checkpoint(best_model, optimizer, epoch, best_val_loss, best_model_path)
+
+        gc.collect()
+        torch.cuda.empty_cache()
 
     print("-" * 80)
     print("Training completed!")

@@ -38,10 +38,10 @@ class TransformerEncoder(nn.Module):
 
 
 class VisionTransformer(nn.Module):
-    def __init__(self, num_classes=10, depth=4, embed_dim=384):
+    def __init__(self, img_size=224, num_classes=10, depth=4, embed_dim=384):
         super().__init__()
 
-        self.patch_embed = PatchEmbedding(embed_dim=embed_dim)
+        self.patch_embed = PatchEmbedding(img_size=img_size, embed_dim=embed_dim)
         self.cls_token = nn.Parameter(torch.zeros(1, 1, embed_dim))
         self.pos_embed = nn.Parameter(torch.zeros(1, 1 + self.patch_embed.num_patches, embed_dim))
 
@@ -73,6 +73,6 @@ class VisionTransformer(nn.Module):
 
         return self.head(x)
 
-def build_model(num_classes):
-    model = VisionTransformer(num_classes=num_classes, depth=10, embed_dim=384)
+def build_model(img_size, num_classes):
+    model = VisionTransformer(img_size=img_size, num_classes=num_classes, depth=10, embed_dim=384)
     return model
