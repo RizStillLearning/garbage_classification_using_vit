@@ -1,5 +1,5 @@
-batch_size: 32
-num_epochs: 100
+batch_size: 128
+num_epochs: 200
 learning_rate: 0.001
 image_size: 224
 weight_decay: 0.01

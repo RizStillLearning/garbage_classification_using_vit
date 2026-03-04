@@ -24,7 +24,7 @@ def main():
     seed_everything(seed)
 
     print("Loading dataset...")
-    df, classes = load_dataset_from_kaggle(dataset_name="sumn2u/garbage-classification-v2", dataset_dir="standardized_256")
+    df, classes = load_dataset_from_kaggle(dataset_name="sumn2u/garbage-classification-v2", dataset_dir="original")
     train_dataset, val_dataset, test_dataset = split_dataset(df)
 
     print("Visualizing dataset...")
@@ -81,7 +81,15 @@ def main():
         scheduler.step()
         current_lr = optimizer.param_groups[0]['lr']
 
-        print(f"Epoch [{epoch}/{num_epochs}], Train Loss: {train_loss:.4f}, Train Acc: {train_acc:.4f}, Val Loss: {val_loss:.4f}, Val Accuracy: {val_acc:.4f}, LR: {current_lr:.6f}")
+        log = f"Epoch [{epoch}/{num_epochs}], Train Loss: {train_loss:.4f}, Train Acc: {train_acc:.4f}, Val Loss: {val_loss:.4f}, Val Accuracy: {val_acc:.4f}, LR: {current_lr:.6f}"
+        print(log)
+
+        mode = "w"
+        if epoch > 1:
+            mode = "a"
+        
+        with open("training_log.txt", mode) as f:
+            f.write(log + "\n")
 
         # Save best model based on validation loss
         if val_loss < best_val_loss:
