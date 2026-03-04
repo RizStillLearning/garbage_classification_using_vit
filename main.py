@@ -88,7 +88,7 @@ def main():
         if epoch > 1:
             mode = "a"
         
-        with open("training_log.txt", mode) as f:
+        with open("outputs/training_log.txt", mode) as f:
             f.write(log + "\n")
 
         # Save best model based on validation loss
