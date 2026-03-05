@@ -67,40 +67,41 @@ def main():
     for params in model.parameters():
         params.requires_grad = True
 
-    print(f"Starting training for {num_epochs} epochs on {device}...")
-    print("-" * 80)
+    if cur_epoch <= num_epochs:
+        print(f"Starting training for {num_epochs} epochs on {device}...")
+        print("-" * 80)
 
-    for epoch in range(cur_epoch, num_epochs+1):
-        train_loss, train_acc = train_epoch(model, device, train_dataloader, criterion, optimizer)
-        val_loss, val_acc = validate(model, device, val_dataloader, criterion)
+        for epoch in range(cur_epoch, num_epochs+1):
+            train_loss, train_acc = train_epoch(model, device, train_dataloader, criterion, optimizer)
+            val_loss, val_acc = validate(model, device, val_dataloader, criterion)
 
-        # Update learning rate scheduler
-        scheduler.step()
-        current_lr = optimizer.param_groups[0]['lr']
+            # Update learning rate scheduler
+            scheduler.step()
+            current_lr = optimizer.param_groups[0]['lr']
 
-        log = f"Epoch [{epoch}/{num_epochs}], Train Loss: {train_loss:.4f}, Train Acc: {train_acc:.4f}, Val Loss: {val_loss:.4f}, Val Accuracy: {val_acc:.4f}, LR: {current_lr:.6f}"
-        print(log)
-        # Save training log to CSV
-        file_open_mode = 'a' if epoch > 1 else 'w'
-        with open(output_log_dir, file_open_mode, newline='') as csvfile:
-            log_writer = csv.writer(csvfile)
-            if epoch == 1 or not Path(output_log_dir).exists():
-                log_writer.writerow(['Epoch', 'Train Loss', 'Train Accuracy', 'Val Loss', 'Val Accuracy', 'Learning Rate'])
-            log_writer.writerow([epoch, f"{train_loss:.4f}", f"{train_acc:.4f}", f"{val_loss:.4f}", f"{val_acc:.4f}", f"{current_lr:.6f}"])
-        # Save best model based on validation loss
-        if val_loss < best_val_loss:
-            best_val_loss = val_loss
-            best_model.load_state_dict(model.state_dict())
-            print(f"  ✓ Best model saved! (val_loss: {val_loss:.4f})")
-            
-        save_checkpoint(best_model, optimizer, epoch, best_val_loss, best_model_path)
-        print("  ✓ Checkpoint saved!")
+            log = f"Epoch [{epoch}/{num_epochs}], Train Loss: {train_loss:.4f}, Train Acc: {train_acc:.4f}, Val Loss: {val_loss:.4f}, Val Accuracy: {val_acc:.4f}, LR: {current_lr:.6f}"
+            print(log)
+            # Save training log to CSV
+            file_open_mode = 'a' if epoch > 1 else 'w'
+            with open(output_log_dir, file_open_mode, newline='') as csvfile:
+                log_writer = csv.writer(csvfile)
+                if epoch == 1 or not Path(output_log_dir).exists():
+                    log_writer.writerow(['Epoch', 'Train Loss', 'Train Accuracy', 'Val Loss', 'Val Accuracy', 'Learning Rate'])
+                log_writer.writerow([epoch, f"{train_loss:.4f}", f"{train_acc:.4f}", f"{val_loss:.4f}", f"{val_acc:.4f}", f"{current_lr:.6f}"])
+            # Save best model based on validation loss
+            if val_loss < best_val_loss:
+                best_val_loss = val_loss
+                best_model.load_state_dict(model.state_dict())
+                print(f"  ✓ Best model saved! (val_loss: {val_loss:.4f})")
+                
+            save_checkpoint(best_model, optimizer, epoch, best_val_loss, best_model_path)
+            print("  ✓ Checkpoint saved!")
 
-        gc.collect()
-        torch.cuda.empty_cache()
+            gc.collect()
+            torch.cuda.empty_cache()
 
-    print("-" * 80)
-    print("Training completed!")
+        print("-" * 80)
+        print("Training completed!")
 
     # Evaluate on test set with best model
     print("\nLoading best model and evaluating on test set...")
