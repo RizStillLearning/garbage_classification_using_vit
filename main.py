@@ -6,7 +6,6 @@ import csv
 from dataset import load_dataset_from_kaggle, split_dataset, build_dataloaders
 from utils import get_device, get_transform, get_target_transform, seed_everything, get_config, save_checkpoint, load_checkpoint
 from model import build_model, save_model, load_model
-from visualization import visualize_dataset
 from train import train_epoch, validate, evaluate_model
 from pathlib import Path
 
@@ -27,11 +26,6 @@ def main():
     df, classes = load_dataset_from_kaggle(dataset_name="sumn2u/garbage-classification-v2", dataset_dir="original")
     train_dataset, val_dataset, test_dataset = split_dataset(df)
 
-    print("Visualizing dataset...")
-    visualize_dataset(train_dataset, classes, file_name='train_label_distribution.png')
-    visualize_dataset(val_dataset, classes, file_name='val_label_distribution.png')
-    visualize_dataset(test_dataset, classes, file_name='test_label_distribution.png')
-
     print("Building dataloaders...")
     target_transform = get_target_transform()
     train_dataloader = build_dataloaders(train_dataset, mode='train', target_transform=target_transform)
@@ -41,7 +35,7 @@ def main():
     config = get_config()
 
     print("Training model...")
-    model = build_model(img_size=config['image_size'], num_classes=len(classes))
+    model = build_model(num_classes=len(classes))
     device = get_device()
     model.to(device)
 
@@ -49,7 +43,7 @@ def main():
     optimizer = optim.AdamW(model.parameters(), lr=config['learning_rate'], weight_decay=config['weight_decay'])
 
     best_val_loss = float('inf')
-    best_model = build_model(img_size=config['image_size'], num_classes=len(classes))
+    best_model = build_model(num_classes=len(classes))
     cur_epoch = 1
 
     best_model_path = config['checkpoint_path']
@@ -92,8 +86,7 @@ def main():
             log_writer = csv.writer(csvfile)
             if epoch == 1 or not Path(output_log_dir).exists():
                 log_writer.writerow(['Epoch', 'Train Loss', 'Train Accuracy', 'Val Loss', 'Val Accuracy', 'Learning Rate'])
-            log_writer.writerow([epoch, train_loss, train_acc, val_loss, val_acc, current_lr])
-
+            log_writer.writerow([epoch, f"{train_loss:.4f}", f"{train_acc:.4f}", f"{val_loss:.4f}", f"{val_acc:.4f}", f"{current_lr:.6f}"])
         # Save best model based on validation loss
         if val_loss < best_val_loss:
             best_val_loss = val_loss
@@ -114,6 +107,14 @@ def main():
     load_model(model, best_model_path, device)
     test_loss, test_acc = evaluate_model(model, device, test_dataloader, criterion)
     print(f"Test Loss: {test_loss:.4f}, Test Accuracy: {test_acc:.4f}")
+
+    # Save the best model for future inference
+    save_config = {
+        'classes': classes,
+        'image_size': config['image_size']
+    }
+    save_model(best_model, save_config, file_path='best_model.pth')
+    print("Best model saved to 'best_model.pth'")
 
 if __name__ == '__main__':
     main()
