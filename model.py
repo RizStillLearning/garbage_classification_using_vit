@@ -73,6 +73,14 @@ class VisionTransformer(nn.Module):
 
         return self.head(x)
 
+def save_model(model, path):
+    torch.save(model.state_dict(), path)
+
+def load_model(model, path, device):
+    model.load_state_dict(torch.load(path, map_location=device))
+    model.to(device)
+    return model
+
 def build_model(img_size, num_classes):
     model = VisionTransformer(img_size=img_size, num_classes=num_classes, depth=10, embed_dim=384)
     return model

@@ -4,7 +4,8 @@ from PIL import Image
 from pathlib import Path
 from sklearn.model_selection import train_test_split
 from torch.utils.data import Dataset, DataLoader
-from utils import get_config
+from utils import get_config, get_transform, get_target_transform
+from typing import Literal
 
 # Custom Dataset class for loading images and labels
 class ImageDataset(Dataset):
@@ -80,16 +81,12 @@ def split_dataset(dataframe, test_size=0.2, random_state=42):
 
     return train_dataset, val_dataset, test_dataset
 
-def build_dataloaders(train_dataset, val_dataset, test_dataset, transform, target_transform):
-    # Create DataLoader instances for training, validation, and test sets
+def build_dataloaders(dataset, mode: Literal['train', 'val', 'test'], target_transform):
+    # Create DataLoader instances based on the passed datasets and transformations
     config = get_config()
     batch_size = config['batch_size']
-    train_data = ImageDataset(train_dataset, transform=transform['train'], target_transform=target_transform)
-    val_data = ImageDataset(val_dataset, transform=transform['val'], target_transform=target_transform)
-    test_data= ImageDataset(test_dataset, transform=transform['test'], target_transform=target_transform)
+    transform = get_transform(mode)
 
-    train_loader = DataLoader(train_data, batch_size=batch_size, shuffle=True)
-    val_loader = DataLoader(val_data, batch_size=batch_size, shuffle=False)
-    test_loader = DataLoader(test_data, batch_size=batch_size, shuffle=False)
-
-    return train_loader, val_loader, test_loader
+    image_dataset = ImageDataset(dataset, transform=transform, target_transform=target_transform)
+    dataloader = DataLoader(image_dataset, batch_size=batch_size, shuffle=(mode == 'train'), num_workers=4, pin_memory=True)
+    return dataloader

@@ -1,6 +1,7 @@
 import torch
 import yaml
 from torchvision import transforms
+from typing import Literal
 
 def get_device():
     return torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -10,13 +11,13 @@ def get_config(file_path='config.yaml'):
         config = yaml.safe_load(f)
     return config
 
-def get_transform():
+def get_transform(mode: Literal['train', 'val', 'test']):
     mean = [0.485, 0.456, 0.406]
     std = [0.229, 0.224, 0.225]
 
     img_size = get_config()['image_size']
 
-    return {
+    transforms_dict = {
         'train': transforms.Compose([
             transforms.RandomResizedCrop(img_size),  # Random crop and resize
             transforms.RandomHorizontalFlip(p=0.5),
@@ -40,6 +41,8 @@ def get_transform():
             transforms.Normalize(mean, std)
         ])
     }
+
+    return transforms_dict[mode]
 
 def get_target_transform():
     return transforms.Lambda(lambda x: torch.tensor(x, dtype=torch.long))

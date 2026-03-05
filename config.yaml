@@ -4,3 +4,5 @@ learning_rate: 0.001
 image_size: 224
 weight_decay: 0.01
 num_classes: 10
+checkpoint_path: './checkpoint.pth'
+output_log_dir: './outputs/training_log.csv'
