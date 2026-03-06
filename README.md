@@ -39,9 +39,9 @@ Modify `config.yaml` to tune hyperparameters and output paths:
 - `learning_rate`: Learning rate for optimizer
 - `checkpoint_path`: Path where checkpoints are saved/loaded
 - `best_model_path`: Final model output path
-- `output_log_dir`: Training log CSV output
-- `classification_report_dir`: Classification report path
-- `confusion_matrix_dir`: Confusion matrix path
+- `output_log_path`: Training log CSV output
+- `classification_report_path`: Classification report path
+- `confusion_matrix_path`: Confusion matrix path
 
 ---
 
@@ -49,3 +49,6 @@ Modify `config.yaml` to tune hyperparameters and output paths:
 
 - `checkpoint.pth` – latest checkpoint during training
 - `best_model.pth` – best model weights saved after training
+- `training_log.csv` - training log per epoch
+- `classification_report.txt` - classification report (accuracy, precision, recall, f1-score)
+- `confusion_matrix.csv` - confusion matrix (actual to predicted label matrix)
