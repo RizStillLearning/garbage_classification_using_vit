@@ -1,5 +1,6 @@
 import torch
 import yaml
+import pandas as pd
 from torchvision import transforms
 from typing import Literal
 
@@ -68,3 +69,11 @@ def load_checkpoint(model, optimizer, file_path='checkpoint.pth'):
     model.load_state_dict(checkpoint['model_state_dict'])
     optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
     return checkpoint['epoch'], checkpoint['val_loss']
+
+def save_classification_report(report, file_path='./outputs/classification_report.txt'):
+    with open(file_path, 'w') as f:
+        f.write(report)
+
+def save_confusion_matrix(conf_matrix, file_path='./outputs/confusion_matrix.csv'):
+    df = pd.DataFrame(conf_matrix)
+    df.to_csv(file_path, index=True)

@@ -1,4 +1,6 @@
 import torch
+import numpy as np
+from sklearn.metrics import classification_report, confusion_matrix
 
 def validate(model, device, val_loader, criterion):
     # VALIDATION PHASE
@@ -74,3 +76,22 @@ def evaluate_model(model, device, test_loader, criterion):
     avg_loss = total_loss / len(test_loader)
     accuracy = correct / total
     return avg_loss, accuracy
+
+def get_metrics_per_class(model, device, test_loader, class_names):
+    model.eval()
+    all_labels = []
+    all_preds = []
+
+    with torch.no_grad():
+        for images, labels in test_loader:
+            images, labels = images.to(device), labels.to(device)
+            outputs = model(images)
+            _, predicted = torch.max(outputs.data, 1)
+
+            all_labels.extend(labels.cpu().numpy())
+            all_preds.extend(predicted.cpu().numpy())
+
+    report = classification_report(all_labels, all_preds, target_names=class_names)
+    conf_matrix = confusion_matrix(all_labels, all_preds)
+
+    return report, conf_matrix

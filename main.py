@@ -4,9 +4,9 @@ import torch.nn as nn
 import gc
 import csv
 from dataset import load_dataset_from_kaggle, split_dataset, build_dataloaders
-from utils import get_device, get_transform, get_target_transform, seed_everything, get_config, save_checkpoint, load_checkpoint
+from utils import get_device, get_target_transform, seed_everything, get_config, save_checkpoint, load_checkpoint, save_classification_report, save_confusion_matrix
 from model import build_model, save_model, load_model
-from train import train_epoch, validate, evaluate_model
+from train import train_epoch, validate, evaluate_model, get_metrics_per_class
 from pathlib import Path
 
 # Additional imports for learning rate scheduler
@@ -46,12 +46,12 @@ def main():
     best_model = build_model(num_classes=len(classes))
     cur_epoch = 1
 
-    best_model_path = config['checkpoint_path']
+    checkpoint_path = config['checkpoint_path']
     output_log_dir = config['output_log_dir']
 
     # Check if checkpoint file exists and load it
-    if Path(best_model_path).exists():
-        cur_epoch, best_val_loss = load_checkpoint(model, optimizer, best_model_path)
+    if Path(checkpoint_path).exists():
+        cur_epoch, best_val_loss = load_checkpoint(model, optimizer, checkpoint_path)
         cur_epoch += 1  # Start from the next epoch
         best_model.load_state_dict(model.state_dict())
         print("Loaded model from checkpoint")
@@ -94,7 +94,7 @@ def main():
                 best_model.load_state_dict(model.state_dict())
                 print(f"  ✓ Best model saved! (val_loss: {val_loss:.4f})")
                 
-            save_checkpoint(best_model, optimizer, epoch, best_val_loss, best_model_path)
+            save_checkpoint(best_model, optimizer, epoch, best_val_loss, checkpoint_path)
             print("  ✓ Checkpoint saved!")
 
             gc.collect()
@@ -105,16 +105,27 @@ def main():
 
     # Evaluate on test set with best model
     print("\nLoading best model and evaluating on test set...")
-    load_model(model, best_model_path, device)
+    _ = load_model(model, checkpoint_path, device)
     test_loss, test_acc = evaluate_model(model, device, test_dataloader, criterion)
     print(f"Test Loss: {test_loss:.4f}, Test Accuracy: {test_acc:.4f}")
+
+    report, conf_matrix = get_metrics_per_class(model, device, test_dataloader, classes)
+    print("\nClassification Report:")
+    print(report)
+    print("\nConfusion Matrix:")
+    print(conf_matrix)
+
+    save_classification_report(report, file_path='./outputs/classification_report.txt')
+    save_confusion_matrix(conf_matrix, file_path='./outputs/confusion_matrix.csv')
 
     # Save the best model for future inference
     save_config = {
         'classes': classes,
         'image_size': config['image_size']
     }
-    save_model(best_model, save_config, file_path='best_model.pth')
+
+    best_model_path = config['best_model_path']
+    save_model(best_model, save_config, file_path=best_model_path)
     print("Best model saved to 'best_model.pth'")
 
 if __name__ == '__main__':

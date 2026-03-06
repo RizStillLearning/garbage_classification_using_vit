@@ -10,8 +10,8 @@ from typing import Literal
 # Custom Dataset class for loading images and labels
 class ImageDataset(Dataset):
     def __init__(self, dataset, transform=None, target_transform=None):
-        self.images = dataset['images']
-        self.labels = dataset['labels']
+        self.images = dataset['image']
+        self.labels = dataset['label']
         self.transform = transform # Transformations for images (e.g., resizing, normalization)
         self.target_transform = target_transform # Transformations for labels (e.g., encoding)
 
@@ -65,18 +65,18 @@ def split_dataset(dataframe, test_size=0.2, random_state=42):
     test_labels = test_df['label'].tolist()
     # Create dictionaries for each dataset
     train_dataset = {
-        'images': train_images,
-        'labels': train_labels
+        'image': train_images,
+        'label': train_labels
     }
 
     val_dataset = {
-        'images': val_images,
-        'labels': val_labels
+        'image': val_images,
+        'label': val_labels
     }
 
     test_dataset = {
-        'images': test_images,
-        'labels': test_labels
+        'image': test_images,
+        'label': test_labels
     }
 
     return train_dataset, val_dataset, test_dataset

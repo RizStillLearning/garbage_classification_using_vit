@@ -1,3 +1,4 @@
+model_name: 'vit_base_patch16_224'
 batch_size: 16
 num_epochs: 20
 learning_rate: 0.001
@@ -5,4 +6,5 @@ image_size: 224
 weight_decay: 0.01
 num_classes: 10
 checkpoint_path: './checkpoint.pth'
+best_model_path: './best_model.pth'
 output_log_dir: './outputs/training_log.csv'
