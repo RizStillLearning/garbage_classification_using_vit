@@ -55,7 +55,7 @@ def seed_everything(seed=42):
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
 
-def save_checkpoint(model, optimizer, epoch, val_loss, file_path='checkpoint.pth'):
+def save_checkpoint(model, optimizer, epoch, val_loss, file_path):
     checkpoint = {
         'model_state_dict': model.state_dict(),
         'optimizer_state_dict': optimizer.state_dict(),
@@ -64,16 +64,16 @@ def save_checkpoint(model, optimizer, epoch, val_loss, file_path='checkpoint.pth
     }
     torch.save(checkpoint, file_path)
 
-def load_checkpoint(model, optimizer, file_path='checkpoint.pth'):
+def load_checkpoint(model, optimizer, file_path):
     checkpoint = torch.load(file_path, weights_only=False, map_location=get_device())
     model.load_state_dict(checkpoint['model_state_dict'])
     optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
     return checkpoint['epoch'], checkpoint['val_loss']
 
-def save_classification_report(report, file_path='./outputs/classification_report.txt'):
+def save_classification_report(report, file_path):
     with open(file_path, 'w') as f:
         f.write(report)
 
-def save_confusion_matrix(conf_matrix, file_path='./outputs/confusion_matrix.csv'):
+def save_confusion_matrix(conf_matrix, file_path):
     df = pd.DataFrame(conf_matrix)
     df.to_csv(file_path, index=True)

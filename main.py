@@ -47,7 +47,7 @@ def main():
     cur_epoch = 1
 
     checkpoint_path = config['checkpoint_path']
-    output_log_dir = config['output_log_dir']
+    output_log_path = config['output_log_path']
 
     # Check if checkpoint file exists and load it
     if Path(checkpoint_path).exists():
@@ -83,9 +83,9 @@ def main():
             print(log)
             # Save training log to CSV
             file_open_mode = 'a' if epoch > 1 else 'w'
-            with open(output_log_dir, file_open_mode, newline='') as csvfile:
+            with open(output_log_path, file_open_mode, newline='') as csvfile:
                 log_writer = csv.writer(csvfile)
-                if epoch == 1 or not Path(output_log_dir).exists():
+                if epoch == 1 or not Path(output_log_path).exists():
                     log_writer.writerow(['Epoch', 'Train Loss', 'Train Accuracy', 'Val Loss', 'Val Accuracy', 'Learning Rate'])
                 log_writer.writerow([epoch, f"{train_loss:.4f}", f"{train_acc:.4f}", f"{val_loss:.4f}", f"{val_acc:.4f}", f"{current_lr:.6f}"])
             # Save best model based on validation loss
@@ -115,10 +115,10 @@ def main():
     print("\nConfusion Matrix:")
     print(conf_matrix)
 
-    classification_report_dir = config['classification_report_dir']
-    confusion_matrix_dir = config['confusion_matrix_dir']
-    save_classification_report(report, file_path=classification_report_dir)
-    save_confusion_matrix(conf_matrix, file_path=confusion_matrix_dir)
+    classification_report_path = config['classification_report_path']
+    confusion_matrix_path = config['confusion_matrix_path']
+    save_classification_report(report, file_path=classification_report_path)
+    save_confusion_matrix(conf_matrix, file_path=confusion_matrix_path)
 
     # Save the best model for future inference
     save_config = {
@@ -128,7 +128,7 @@ def main():
 
     best_model_path = config['best_model_path']
     save_model(best_model, save_config, file_path=best_model_path)
-    print("Best model saved to 'best_model.pth'")
+    print(f"Best model saved to '{best_model_path}'")
 
 if __name__ == '__main__':
     main()
