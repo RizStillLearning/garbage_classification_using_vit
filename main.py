@@ -115,8 +115,10 @@ def main():
     print("\nConfusion Matrix:")
     print(conf_matrix)
 
-    save_classification_report(report, file_path='./outputs/classification_report.txt')
-    save_confusion_matrix(conf_matrix, file_path='./outputs/confusion_matrix.csv')
+    classification_report_dir = config['classification_report_dir']
+    confusion_matrix_dir = config['confusion_matrix_dir']
+    save_classification_report(report, file_path=classification_report_dir)
+    save_confusion_matrix(conf_matrix, file_path=confusion_matrix_dir)
 
     # Save the best model for future inference
     save_config = {

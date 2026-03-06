@@ -8,3 +8,5 @@ num_classes: 10
 checkpoint_path: './checkpoint.pth'
 best_model_path: './best_model.pth'
 output_log_dir: './outputs/training_log.csv'
+classification_report_dir: './outputs/classification_report.txt'
+confusion_matrix_dir: './outputs/confusion_matrix.csv'
