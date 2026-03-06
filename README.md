@@ -25,6 +25,7 @@ Example:
 ```bash
 python predict.py ./test_images/banana.jpg
 ```
+Path to image can be either relative or absolute path
 
 ## 🛠 Configuration
 
