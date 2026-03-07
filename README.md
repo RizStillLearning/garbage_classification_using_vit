@@ -34,14 +34,14 @@ Path to image can be either relative or absolute path.
 
 Modify `config.yaml` to tune hyperparameters and output paths:
 
+- `model_name`: Name of the pretrained model
 - `num_epochs`: Number of training epochs
 - `batch_size`: Batch size for training/validation
 - `learning_rate`: Learning rate for optimizer
-- `checkpoint_path`: Path where checkpoints are saved/loaded
-- `best_model_path`: Final model output path
-- `output_log_path`: Training log CSV output
-- `classification_report_path`: Classification report path
-- `confusion_matrix_path`: Confusion matrix path
+- `weight_decay`: Weight decay
+- `image_size`: Desired image size for preprocessing
+- `model_dir`: Directory for model output
+- `output_dir`: Directory for model training and evaluation log
 
 ---
 
