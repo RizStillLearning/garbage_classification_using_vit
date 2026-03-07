@@ -3,6 +3,7 @@ import torch.optim as optim
 import torch.nn as nn
 import gc
 import csv
+import os
 from dataset import load_dataset_from_kaggle, split_dataset, build_dataloaders
 from utils import get_device, get_target_transform, seed_everything, get_config, save_checkpoint, load_checkpoint, save_classification_report, save_confusion_matrix
 from model import build_model, save_model, load_model
@@ -46,12 +47,16 @@ def main():
     best_model = build_model(num_classes=len(classes))
     cur_epoch = 1
 
-    checkpoint_path = config['checkpoint_path']
-    output_log_path = config['output_log_path']
+    checkpoint_name = 'checkpoint.pth'
+    checkpoint_path = os.path.join(get_config()['model_dir'], checkpoint_name)
+
+    best_model_name = 'best_model.pth'
+    train_log_name = 'training_log.csv'
+    train_log_path = os.path.join(get_config()['output_dir'], train_log_name)
 
     # Check if checkpoint file exists and load it
     if Path(checkpoint_path).exists():
-        cur_epoch, best_val_loss = load_checkpoint(model, optimizer, checkpoint_path)
+        cur_epoch, best_val_loss = load_checkpoint(model, optimizer, checkpoint_name)
         cur_epoch += 1  # Start from the next epoch
         best_model.load_state_dict(model.state_dict())
         print("Loaded model from checkpoint")
@@ -83,9 +88,9 @@ def main():
             print(log)
             # Save training log to CSV
             file_open_mode = 'a' if epoch > 1 else 'w'
-            with open(output_log_path, file_open_mode, newline='') as csvfile:
+            with open(train_log_path, file_open_mode, newline='') as csvfile:
                 log_writer = csv.writer(csvfile)
-                if epoch == 1 or not Path(output_log_path).exists():
+                if epoch == 1 or not Path(train_log_path).exists():
                     log_writer.writerow(['Epoch', 'Train Loss', 'Train Accuracy', 'Val Loss', 'Val Accuracy', 'Learning Rate'])
                 log_writer.writerow([epoch, f"{train_loss:.4f}", f"{train_acc:.4f}", f"{val_loss:.4f}", f"{val_acc:.4f}", f"{current_lr:.6f}"])
             # Save best model based on validation loss
@@ -94,7 +99,7 @@ def main():
                 best_model.load_state_dict(model.state_dict())
                 print(f"  ✓ Best model saved! (val_loss: {val_loss:.4f})")
                 
-            save_checkpoint(best_model, optimizer, epoch, best_val_loss, checkpoint_path)
+            save_checkpoint(best_model, optimizer, epoch, best_val_loss, checkpoint_name)
             print("  ✓ Checkpoint saved!")
 
             gc.collect()
@@ -105,7 +110,7 @@ def main():
 
     # Evaluate on test set with best model
     print("\nLoading best model and evaluating on test set...")
-    _ = load_model(model, checkpoint_path, device)
+    _ = load_model(model, checkpoint_name, device)
     test_loss, test_acc = evaluate_model(model, device, test_dataloader, criterion)
     print(f"Test Loss: {test_loss:.4f}, Test Accuracy: {test_acc:.4f}")
 
@@ -115,10 +120,8 @@ def main():
     print("\nConfusion Matrix:")
     print(conf_matrix)
 
-    classification_report_path = config['classification_report_path']
-    confusion_matrix_path = config['confusion_matrix_path']
-    save_classification_report(report, file_path=classification_report_path)
-    save_confusion_matrix(conf_matrix, file_path=confusion_matrix_path)
+    save_classification_report(report, 'classification_report.txt')
+    save_confusion_matrix(conf_matrix, 'confusion_matrix.csv')
 
     # Save the best model for future inference
     save_config = {
@@ -126,9 +129,8 @@ def main():
         'image_size': config['image_size']
     }
 
-    best_model_path = config['best_model_path']
-    save_model(best_model, save_config, file_path=best_model_path)
-    print(f"Best model saved to '{best_model_path}'")
+    save_model(best_model, save_config, file_name=best_model_name)
+    print(f"Best model saved to '{best_model_name}'")
 
 if __name__ == '__main__':
     main()

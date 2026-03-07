@@ -1,5 +1,6 @@
 import torch
 import yaml
+import os
 import pandas as pd
 from torchvision import transforms
 from typing import Literal
@@ -55,7 +56,8 @@ def seed_everything(seed=42):
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
 
-def save_checkpoint(model, optimizer, epoch, val_loss, file_path):
+def save_checkpoint(model, optimizer, epoch, val_loss, file_name='checkpoint.pth'):
+    file_path = os.path.join(get_config()['model_dir'], file_name)
     checkpoint = {
         'model_state_dict': model.state_dict(),
         'optimizer_state_dict': optimizer.state_dict(),
@@ -64,16 +66,19 @@ def save_checkpoint(model, optimizer, epoch, val_loss, file_path):
     }
     torch.save(checkpoint, file_path)
 
-def load_checkpoint(model, optimizer, file_path):
+def load_checkpoint(model, optimizer, file_name):
+    file_path = os.path.join(get_config()['model_dir'], file_name)
     checkpoint = torch.load(file_path, weights_only=False, map_location=get_device())
     model.load_state_dict(checkpoint['model_state_dict'])
     optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
     return checkpoint['epoch'], checkpoint['val_loss']
 
-def save_classification_report(report, file_path):
+def save_classification_report(report, file_name):
+    file_path = os.path.join(get_config()['output_dir'], file_name)
     with open(file_path, 'w') as f:
         f.write(report)
 
-def save_confusion_matrix(conf_matrix, file_path):
+def save_confusion_matrix(conf_matrix, file_name):
+    file_path = os.path.join(get_config()['output_dir'], file_name)
     df = pd.DataFrame(conf_matrix)
     df.to_csv(file_path, index=True)

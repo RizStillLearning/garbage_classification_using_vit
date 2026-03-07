@@ -1,5 +1,6 @@
 import torch
 import timm
+import os
 from utils import get_config
     
 def build_model(num_classes=10):
@@ -8,12 +9,14 @@ def build_model(num_classes=10):
     model = timm.create_model(model_name, pretrained=True, num_classes=num_classes)
     return model
 
-def save_model(model, save_config: dict, file_path='best_model.pth'):
+def save_model(model, save_config: dict, file_name='best_model.pth'):
     save_config['model_state_dict'] = model.state_dict()
+    file_path = os.path.join(get_config()['model_dir'], file_name)
     torch.save(save_config, file_path)
 
-def load_model(model, path, device):
-    save_config = torch.load(path, map_location=device)
+def load_model(model, file_name, device):
+    file_path = os.path.join(get_config()['model_dir'], file_name)
+    save_config = torch.load(file_path, map_location=device)
     model.load_state_dict(save_config['model_state_dict'])
     model.to(device)
     return save_config

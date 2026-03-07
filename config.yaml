@@ -5,8 +5,5 @@ learning_rate: 0.001
 image_size: 224
 weight_decay: 0.01
 num_classes: 10
-checkpoint_path: './model/checkpoint.pth'
-best_model_path: './model/best_model.pth'
-output_log_path: './outputs/training_log.csv'
-classification_report_path: './outputs/classification_report.txt'
-confusion_matrix_path: './outputs/confusion_matrix.csv'
+model_dir: './model'
+output_dir: './output'
