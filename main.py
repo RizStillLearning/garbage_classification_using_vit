@@ -38,10 +38,10 @@ def main():
     model = build_model(num_classes=len(classes))
     device = get_device()
     model.to(device)
-
+    # Define loss function and optimizer
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.AdamW(model.parameters(), lr=config['learning_rate'], weight_decay=config['weight_decay'])
-
+    # Initialize variables for tracking best model and training state
     best_val_loss = float('inf')
     best_model = build_model(num_classes=len(classes))
     cur_epoch = 1
@@ -50,6 +50,8 @@ def main():
     checkpoint_path = os.path.join(get_config()['model_dir'], checkpoint_name)
 
     best_model_name = 'best_model.pth'
+    best_model_path = os.path.join(get_config()['model_dir'], best_model_name)
+
     train_log_name = 'training_log.csv'
 
     # Check if checkpoint file exists and load it
@@ -68,8 +70,8 @@ def main():
 
     for params in model.parameters():
         params.requires_grad = True
-
-    if cur_epoch <= num_epochs:
+    # Only train the model if final model file doesn't exist (to avoid overwriting best model if it exists)
+    if not Path(best_model_path).exists():
         print(f"Starting training for {num_epochs - cur_epoch + 1} epochs on {device}...")
         print("-" * 80)
 
@@ -113,7 +115,7 @@ def main():
     print("\nConfusion Matrix:")
     print(conf_matrix)
 
-    classification_report_name = 'classification_report.txt'
+    classification_report_name = 'classification_report.json'
     confusion_matrix_name = 'confusion_matrix.csv'
     save_classification_report(report, file_name=classification_report_name)
     save_confusion_matrix(conf_matrix, file_name=confusion_matrix_name)

@@ -2,6 +2,7 @@ import torch
 import yaml
 import os
 import csv
+import json
 import pandas as pd
 from pathlib import Path
 from torchvision import transforms
@@ -90,7 +91,7 @@ def save_classification_report(report, file_name):
     os.makedirs(get_config()['output_dir'], exist_ok=True)
     file_path = os.path.join(get_config()['output_dir'], file_name)
     with open(file_path, 'w') as f:
-        f.write(report)
+        json.dump(report, f, indent=4)
 
 def save_confusion_matrix(conf_matrix, file_name):
     file_path = os.path.join(get_config()['output_dir'], file_name)

@@ -91,7 +91,7 @@ def get_metrics_per_class(model, device, test_loader, class_names):
             all_labels.extend(labels.cpu().numpy())
             all_preds.extend(predicted.cpu().numpy())
 
-    report = classification_report(all_labels, all_preds, target_names=class_names)
+    report = classification_report(all_labels, all_preds, target_names=class_names, output_dict=True)
     conf_matrix = confusion_matrix(all_labels, all_preds)
 
     return report, conf_matrix
