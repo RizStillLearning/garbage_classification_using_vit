@@ -2,10 +2,9 @@ import torch
 import torch.optim as optim
 import torch.nn as nn
 import gc
-import csv
 import os
 from dataset import load_dataset_from_kaggle, split_dataset, build_dataloaders
-from utils import get_device, get_target_transform, seed_everything, get_config, save_checkpoint, load_checkpoint, save_classification_report, save_confusion_matrix
+from utils import get_device, get_target_transform, seed_everything, get_config, save_checkpoint, load_checkpoint, write_training_log, save_classification_report, save_confusion_matrix
 from model import build_model, save_model, load_model
 from train import train_epoch, validate, evaluate_model, get_metrics_per_class
 from pathlib import Path
@@ -52,12 +51,10 @@ def main():
 
     best_model_name = 'best_model.pth'
     train_log_name = 'training_log.csv'
-    train_log_path = os.path.join(get_config()['output_dir'], train_log_name)
 
     # Check if checkpoint file exists and load it
     if Path(checkpoint_path).exists():
         cur_epoch, best_val_loss = load_checkpoint(model, optimizer, checkpoint_name)
-        cur_epoch += 1  # Start from the next epoch
         best_model.load_state_dict(model.state_dict())
         print("Loaded model from checkpoint")
         print(f"Current epoch: {cur_epoch}, Current best validation loss: {best_val_loss:.4f}")
@@ -73,7 +70,7 @@ def main():
         params.requires_grad = True
 
     if cur_epoch <= num_epochs:
-        print(f"Starting training for {num_epochs} epochs on {device}...")
+        print(f"Starting training for {num_epochs - cur_epoch + 1} epochs on {device}...")
         print("-" * 80)
 
         for epoch in range(cur_epoch, num_epochs+1):
@@ -87,12 +84,8 @@ def main():
             log = f"Epoch [{epoch}/{num_epochs}], Train Loss: {train_loss:.4f}, Train Acc: {train_acc:.4f}, Val Loss: {val_loss:.4f}, Val Accuracy: {val_acc:.4f}, LR: {current_lr:.6f}"
             print(log)
             # Save training log to CSV
-            file_open_mode = 'a' if epoch > 1 else 'w'
-            with open(train_log_path, file_open_mode, newline='') as csvfile:
-                log_writer = csv.writer(csvfile)
-                if epoch == 1 or not Path(train_log_path).exists():
-                    log_writer.writerow(['Epoch', 'Train Loss', 'Train Accuracy', 'Val Loss', 'Val Accuracy', 'Learning Rate'])
-                log_writer.writerow([epoch, f"{train_loss:.4f}", f"{train_acc:.4f}", f"{val_loss:.4f}", f"{val_acc:.4f}", f"{current_lr:.6f}"])
+            if epoch > cur_epoch: # Only write log if it's a new epoch (not loaded from checkpoint)
+                write_training_log(epoch, train_loss, train_acc, val_loss, val_acc, current_lr, file_name=train_log_name)
             # Save best model based on validation loss
             if val_loss < best_val_loss:
                 best_val_loss = val_loss
@@ -120,8 +113,10 @@ def main():
     print("\nConfusion Matrix:")
     print(conf_matrix)
 
-    save_classification_report(report, 'classification_report.txt')
-    save_confusion_matrix(conf_matrix, 'confusion_matrix.csv')
+    classification_report_name = 'classification_report.txt'
+    confusion_matrix_name = 'confusion_matrix.csv'
+    save_classification_report(report, file_name=classification_report_name)
+    save_confusion_matrix(conf_matrix, file_name=confusion_matrix_name)
 
     # Save the best model for future inference
     save_config = {

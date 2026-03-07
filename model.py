@@ -10,6 +10,7 @@ def build_model(num_classes=10):
     return model
 
 def save_model(model, save_config: dict, file_name='best_model.pth'):
+    os.makedirs(get_config()['model_dir'], exist_ok=True)
     save_config['model_state_dict'] = model.state_dict()
     file_path = os.path.join(get_config()['model_dir'], file_name)
     torch.save(save_config, file_path)

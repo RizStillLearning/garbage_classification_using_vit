@@ -1,7 +1,9 @@
 import torch
 import yaml
 import os
+import csv
 import pandas as pd
+from pathlib import Path
 from torchvision import transforms
 from typing import Literal
 
@@ -57,6 +59,7 @@ def seed_everything(seed=42):
     torch.backends.cudnn.benchmark = False
 
 def save_checkpoint(model, optimizer, epoch, val_loss, file_name='checkpoint.pth'):
+    os.makedirs(get_config()['model_dir'], exist_ok=True)
     file_path = os.path.join(get_config()['model_dir'], file_name)
     checkpoint = {
         'model_state_dict': model.state_dict(),
@@ -73,7 +76,18 @@ def load_checkpoint(model, optimizer, file_name):
     optimizer.load_state_dict(checkpoint['optimizer_state_dict'])
     return checkpoint['epoch'], checkpoint['val_loss']
 
+def write_training_log(epoch, train_loss, train_acc, val_loss, val_acc, current_lr, file_name='training_log.csv'):
+    os.makedirs(get_config()['output_dir'], exist_ok=True)
+    file_path = os.path.join(get_config()['output_dir'], file_name)
+    file_open_mode = 'a' if epoch > 1 else 'w'
+    with open(file_path, file_open_mode, newline='') as csvfile:
+        log_writer = csv.writer(csvfile)
+        if epoch == 1 or not Path(file_path).exists():
+            log_writer.writerow(['Epoch', 'Train Loss', 'Train Accuracy', 'Val Loss', 'Val Accuracy', 'Learning Rate'])
+        log_writer.writerow([epoch, f"{train_loss:.4f}", f"{train_acc:.4f}", f"{val_loss:.4f}", f"{val_acc:.4f}", f"{current_lr:.6f}"])
+
 def save_classification_report(report, file_name):
+    os.makedirs(get_config()['output_dir'], exist_ok=True)
     file_path = os.path.join(get_config()['output_dir'], file_name)
     with open(file_path, 'w') as f:
         f.write(report)
