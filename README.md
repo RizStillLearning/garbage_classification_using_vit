@@ -30,6 +30,31 @@ python predict.py ./test_images/banana.jpg
 ```
 Path to image can be either relative or absolute path.
 
+### 3) Run the API Server
+To run the API Server, you need to install uvicorn fia following command:
+```bash
+pip install uvicorn
+```
+
+Once the installation is done, run the API server with:
+```bash
+uvicorn app:app --reload
+```
+
+Here is the step by step to test the endpoint:
+1. Open your web browser and go to http://127.0.0.1:8000/docs
+2. Expand the POST `/predict/` bar and click `Try it out`
+3. Select a garbage image from your files and click `Execute`
+
+You will see a JSON response showing the predicted class and the confidence score like this:
+```json
+{
+  "filename": "plastic.jpg",
+  "predicted_class": "plastic",
+  "probability": "1.00"
+}
+```
+
 ## 🛠 Configuration
 
 Modify `config.yaml` to tune hyperparameters and output paths:
