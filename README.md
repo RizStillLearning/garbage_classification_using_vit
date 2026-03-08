@@ -14,7 +14,7 @@ python main.py
 > The training configuration (learning rate, batch size, number of epochs, etc.) is controlled via `config.yaml`.
 
 > [!NOTE]
-> Training can be paused anytime after the checkpoint is saved. When you resume the training, the model will simply load the latest checkpoint. If you wanna reset the whole training progress, delete the "checkpoint.pth" file.
+> Training can be paused anytime after the checkpoint is saved. When you resume the training, the model will simply load the latest checkpoint. If you wanna reset the whole training progress, delete the "checkpoint.pth" file. If the "best_model.pth" also exists, delete the file too.
 
 ### 2) Inference (Predict on a single image)
 Once a model training is completed and saved to `best_model.pth`, run:
