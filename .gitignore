@@ -1,5 +1,6 @@
 __pycache__/
 model/
+deploy.py
 *.pth
 *.jpg
 *.png
